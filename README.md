@@ -1,3 +1,6 @@
+# This fork
+Removes threading to improve stability. Be sure to call GDNetHost.service every frame.
+
 # GDNet
 
 An [ENet](http://enet.bespin.org/) wrapper for Godot.
@@ -40,6 +43,7 @@ func _init():
 	peer2 = client2.host_connect(address)
 
 func _process(delta):
+	client1.service()
 	if (client1.is_event_available()):
 		var event = client1.get_event()
 
@@ -50,6 +54,7 @@ func _process(delta):
 		if (event.get_event_type() == GDNetEvent.RECEIVE):
 			print(event.get_var())
 
+	client2.service()
 	if (client2.is_event_available()):
 		var event = client2.get_event()
 
@@ -60,6 +65,7 @@ func _process(delta):
 		if (event.get_event_type() == GDNetEvent.RECEIVE):
 			print(event.get_var())
 
+	server.service()
 	if (server.is_event_available()):
 		var event = server.get_event()
 
@@ -110,6 +116,7 @@ Server broadcast
 
 #### GDNetHost
 
+- **service()** - sends and receives queued packets, call this often
 - **get_peer(id:Integer):GDNetPeer**
 - **set_event_wait(id:Integer)** - sets the duration of time the host thread will wait (block) for events (default: 1 ms)
 - **set_max_peers(max:Integer)** - must be called before `bind` (default: 32)

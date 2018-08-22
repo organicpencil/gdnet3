@@ -2,51 +2,11 @@
 
 GDNetHost::GDNetHost() :
 	_host(NULL),
-	_running(false),
-	_thread(NULL),
-	_accessMutex(NULL),
-	_hostMutex(NULL),
 	_event_wait(DEFAULT_EVENT_WAIT),
 	_max_peers(DEFAULT_MAX_PEERS),
 	_max_channels(DEFAULT_MAX_CHANNELS),
 	_max_bandwidth_in(0),
 	_max_bandwidth_out(0) {
-}
-
-void GDNetHost::thread_start() {
-	_running = true;
-	_accessMutex = Mutex::create();
-	_hostMutex = Mutex::create();
-	_thread = Thread::create(thread_callback, this);
-}
-
-void GDNetHost::thread_stop() {
-	_running = false;
-
-	Thread::wait_to_finish(_thread);
-
-	memdelete(_thread);
-	_thread = NULL;
-
-	memdelete(_accessMutex);
-	_accessMutex = NULL;
-
-	memdelete(_hostMutex);
-	_hostMutex = NULL;
-}
-
-void GDNetHost::thread_callback(void *instance) {
-	reinterpret_cast<GDNetHost*>(instance)->thread_loop();
-}
-
-void GDNetHost::acquireMutex() {
-	_accessMutex->lock();
-	_hostMutex->lock();
-	_accessMutex->unlock();
-}
-
-void GDNetHost::releaseMutex() {
-	_hostMutex->unlock();
 }
 
 int GDNetHost::get_peer_id(PENetPeer* peer) {
@@ -146,15 +106,9 @@ void GDNetHost::poll_events() {
 	}
 }
 
-void GDNetHost::thread_loop() {
-	while (_running) {
-		acquireMutex();
-
-		send_messages();
-		poll_events();
-
-		releaseMutex();
-	}
+void GDNetHost::service() {
+	send_messages();
+	poll_events();
 }
 
 Ref<GDNetPeer> GDNetHost::get_peer(unsigned id) {
@@ -190,14 +144,11 @@ Error GDNetHost::bind(Ref<GDNetAddress> addr) {
 
 	ERR_FAIL_COND_V(_host == NULL, FAILED);
 
-	thread_start();
-
 	return OK;
 }
 
 void GDNetHost::unbind() {
 	if (_host != NULL) {
-		thread_stop();
 		penet_host_flush(_host);
 		penet_host_destroy(_host);
 		_host = NULL;
@@ -269,6 +220,8 @@ Ref<GDNetEvent> GDNetHost::get_event() {
 }
 
 void GDNetHost::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("service"),&GDNetHost::service);
+
 	ClassDB::bind_method(D_METHOD("get_peer"),&GDNetHost::get_peer);
 
 	ClassDB::bind_method(D_METHOD("set_event_wait"),&GDNetHost::set_event_wait); // Deprecated

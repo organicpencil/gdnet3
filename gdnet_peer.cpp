@@ -33,62 +33,32 @@ int GDNetPeer::get_avg_rtt() {
 
 void GDNetPeer::ping() {
 	ERR_FAIL_COND(_host->_host == NULL);
-
-	_host->acquireMutex();
-
 	penet_peer_ping(_peer);
-
-	_host->releaseMutex();
 }
 
 void GDNetPeer::set_ping_interval(int pingInterval) {
     ERR_FAIL_COND(_host->_host == NULL);
- 
-    _host->acquireMutex();
- 
     penet_peer_ping_interval(_peer, pingInterval);
- 
-    _host->releaseMutex();
 }
 
 void GDNetPeer::reset() {
 	ERR_FAIL_COND(_host->_host == NULL);
-
-	_host->acquireMutex();
-
 	penet_peer_reset(_peer);
-
-	_host->releaseMutex();
 }
 
 void GDNetPeer::peer_disconnect(int data) {
 	ERR_FAIL_COND(_host->_host == NULL);
-
-	_host->acquireMutex();
-
 	penet_peer_disconnect(_peer, data);
-
-	_host->releaseMutex();
 }
 
 void GDNetPeer::disconnect_later(int data) {
 	ERR_FAIL_COND(_host->_host == NULL);
-
-	_host->acquireMutex();
-
 	penet_peer_disconnect_later(_peer, data);
-
-	_host->releaseMutex();
 }
 
 void GDNetPeer::disconnect_now(int data) {
 	ERR_FAIL_COND(_host->_host == NULL);
-
-	_host->acquireMutex();
-
 	penet_peer_disconnect_now(_peer, data);
-
-	_host->releaseMutex();
 }
 
 void GDNetPeer::send_packet(const PoolByteArray& packet, int channel_id, int type) {
@@ -129,12 +99,7 @@ void GDNetPeer::send_var(const Variant& var, int channel_id, int type) {
 
 void GDNetPeer::set_timeout(int limit, int min_timeout, int max_timeout) {
 	ERR_FAIL_COND(_host->_host == NULL);
-
-	_host->acquireMutex();
-
 	penet_peer_timeout(_peer, limit, min_timeout, max_timeout);
-
-	_host->releaseMutex();
 }
 
 void GDNetPeer::_bind_methods() {

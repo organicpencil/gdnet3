@@ -5,8 +5,6 @@
 
 #include <string.h>
 
-#include "os/thread.h"
-#include "os/mutex.h"
 #include "os/os.h"
 #include "reference.h"
 
@@ -34,10 +32,6 @@ class GDNetHost : public Reference {
 	};
 
 	PENetHost* _host;
-	volatile bool _running;
-	Thread* _thread;
-	Mutex* _accessMutex;
-	Mutex* _hostMutex;
 
 	int _event_wait;
 	int _max_peers;
@@ -51,14 +45,6 @@ class GDNetHost : public Reference {
 	void send_messages();
 	void poll_events();
 
-	static void thread_callback(void *instance);
-	void thread_start();
-	void thread_loop();
-	void thread_stop();
-
-	void acquireMutex();
-	void releaseMutex();
-
 	int get_peer_id(PENetPeer *peer);
 	GDNetEvent* new_event(const PENetEvent& penet_event);
 
@@ -69,6 +55,8 @@ protected:
 public:
 
 	GDNetHost();
+
+	void service();
 
 	Ref<GDNetPeer> get_peer(unsigned id);
 
